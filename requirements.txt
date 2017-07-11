@@ -1,4 +1,5 @@
 flask
+jsonpath-rw
 pendulum
 requests
 gunicorn
