@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request, Response
-from jsonpath_rw import jsonpath, parse
+from flask import Flask, jsonify, request
+from jsonpath_rw import parse
 import json
 import pendulum
 import requests
@@ -18,7 +18,6 @@ def calculate_age(timestamp):
     timestamp_parsed = pendulum.parse(timestamp)
     age = now.diff(timestamp_parsed).in_seconds()
     return age
-
 
 @app.route('/_healthcheck')
 def healthcheck():
