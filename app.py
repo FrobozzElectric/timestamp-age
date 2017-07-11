@@ -34,8 +34,11 @@ def timestamp_age():
         path = request.args.get('path')
     else:
         return jsonify({'error': 'missing "path" parameter'}), 422
-    r = requests.get(url)
-    r.raise_for_status()
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
     data = json.loads(r.text)
     matches = parse_json(data, path)
     return jsonify(matches)
