@@ -30,7 +30,7 @@ def timestamp_age():
     else:
         return jsonify({'error': 'missing "url" parameter'}), 422
     if request.args.get('path'):
-        path = request.args.get('path')
+        paths = request.args.get('path').split(",")
     else:
         return jsonify({'error': 'missing "path" parameter'}), 422
     try:
@@ -39,8 +39,10 @@ def timestamp_age():
     except Exception as error:
         return jsonify({'error': str(error)}), 500
     data = json.loads(r.text)
-    matches = parse_json(data, path)
-    return jsonify(matches)
+    results = {}
+    for path in paths:
+        results.update(parse_json(data, path))
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
