@@ -25,14 +25,12 @@ def healthcheck():
 
 @app.route('/')
 def timestamp_age():
-    if request.args.get('url'):
+    args = request.args
+    if 'url' in args and 'path' in args:
         url = request.args.get('url')
-    else:
-        return jsonify({'error': 'missing "url" parameter'}), 422
-    if request.args.get('path'):
         paths = request.args.get('path').split(",")
     else:
-        return jsonify({'error': 'missing "path" parameter'}), 422
+        return jsonify({'error': 'missing "url" or "path" parameter'}), 422
     try:
         r = requests.get(url)
         r.raise_for_status()
