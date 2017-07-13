@@ -6,18 +6,21 @@ import requests
 
 app = Flask(__name__)
 
+def calculate_age(timestamp):
+    now = pendulum.now()
+    try:
+        timestamp_parsed = pendulum.parse(timestamp)
+    except Exception as error:
+        return str(error)
+    age = now.diff(timestamp_parsed).in_seconds()
+    return age
+
 def parse_json(data, path):
     jsonpath_expr = parse(path)
     matches = {}
     for match in jsonpath_expr.find(data):
         matches[str(match.full_path)] = calculate_age(match.value)
     return matches
-
-def calculate_age(timestamp):
-    now = pendulum.now()
-    timestamp_parsed = pendulum.parse(timestamp)
-    age = now.diff(timestamp_parsed).in_seconds()
-    return age
 
 @app.route('/_healthcheck')
 def healthcheck():
@@ -27,8 +30,8 @@ def healthcheck():
 def timestamp_age():
     args = request.args
     if 'url' in args and 'path' in args:
-        url = request.args.get('url')
-        paths = request.args.get('path').split(",")
+        url = args.get('url')
+        paths = args.get('path').split(",")
     else:
         return jsonify({'error': 'missing "url" or "path" parameter'}), 422
     try:
