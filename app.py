@@ -16,7 +16,10 @@ def calculate_age(timestamp):
     return age
 
 def parse_json(data, path):
-    jsonpath_expr = parse(path)
+    try:
+        jsonpath_expr = parse(path)
+    except Exception as error:
+        return {path: str(error)}
     matches = {}
     for match in jsonpath_expr.find(data):
         matches[str(match.full_path)] = calculate_age(match.value)
