@@ -10,16 +10,16 @@ def calculate_age(timestamp):
     now = pendulum.now()
     try:
         timestamp_parsed = pendulum.parse(timestamp)
-    except Exception as error:
-        return str(error)
+    except:
+        return "unable to parse timestamp"
     age = now.diff(timestamp_parsed).in_seconds()
     return age
 
 def parse_json(data, path):
     try:
         jsonpath_expr = parse(path)
-    except Exception as error:
-        return {path: str(error)}
+    except:
+        return {path: "invalid JSON path"}
     matches = {}
     for match in jsonpath_expr.find(data):
         matches[str(match.full_path)] = calculate_age(match.value)
