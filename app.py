@@ -7,19 +7,25 @@ import requests
 app = Flask(__name__)
 
 
+def calculate_age(timestamp):
+    now = pendulum.now()
+    try:
+        timestamp_parsed = pendulum.parse(timestamp)
+    except:
+        return "unable to parse timestamp"
+    age = now.diff(timestamp_parsed).in_seconds()
+    return age
+
+
 def parse_json(data, path):
-    jsonpath_expr = parse(path)
+    try:
+        jsonpath_expr = parse(path)
+    except:
+        return {path: "invalid JSON path"}
     matches = {}
     for match in jsonpath_expr.find(data):
         matches[str(match.full_path)] = calculate_age(match.value)
     return matches
-
-
-def calculate_age(timestamp):
-    now = pendulum.now()
-    timestamp_parsed = pendulum.parse(timestamp)
-    age = now.diff(timestamp_parsed).in_seconds()
-    return age
 
 
 def abort_request(message, status):
@@ -33,14 +39,12 @@ def healthcheck():
 
 @app.route('/')
 def timestamp_age():
-    if request.args.get('url'):
-        url = request.args.get('url')
+    args = request.args
+    if 'url' in args and 'path' in args:
+        url = args.get('url')
+        paths = args.get('path').split(",")
     else:
-        abort_request('missing "url" parameter', 422)
-    if request.args.get('path'):
-        paths = request.args.get('path').split(",")
-    else:
-        abort_request('missing "path" parameter', 422)
+        abort_request('missing "url" or "path" parameter', 422)
     try:
         r = requests.get(url)
         r.raise_for_status()
