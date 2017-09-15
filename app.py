@@ -12,7 +12,7 @@ def calculate_age(timestamp):
     try:
         timestamp_parsed = pendulum.parse(timestamp)
     except:
-        return "unable to parse timestamp"
+        return 'unable to parse timestamp'
     age = now.diff(timestamp_parsed).in_seconds()
     return age
 
@@ -21,7 +21,7 @@ def parse_json(data, path):
     try:
         jsonpath_expr = parse(path)
     except:
-        return {path: "invalid JSON path"}
+        return {path: 'invalid JSON path'}
     matches = {}
     for match in jsonpath_expr.find(data):
         matches[str(match.full_path)] = calculate_age(match.value)
@@ -42,15 +42,19 @@ def timestamp_age():
     args = request.args
     if 'url' in args and 'path' in args:
         url = args.get('url')
-        paths = args.get('path').split(",")
+        paths = args.get('path').split(',')
     else:
-        abort_request('missing "url" or "path" parameter', 422)
+        abort_request('missing \'url\' or \'path\' parameter', 422)
     try:
         r = requests.get(url)
         r.raise_for_status()
     except Exception as error:
-        abort_request(str(error), 500)
-    data = json.loads(r.text)
+        code = r.status_code if 'r' in vars() else 500
+        abort_request(str(error), code)
+    try:
+        data = json.loads(r.text)
+    except ValueError:
+        abort_request('invalid JSON', 422)
     results = {'code': 200, 'error': None}
     for path in paths:
         results.update(parse_json(data, path))
